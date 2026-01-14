@@ -1,92 +1,3 @@
--- Creating category table.
-CREATE TABLE category (
-category_id INT PRIMARY KEY,
-category_name VARCHAR(20)
-);
-
--- Creating customers table
-DROP TABLE IF EXISTS customers;
-CREATE TABLE customers (
-customer_id INT PRIMARY KEY,
-first_name VARCHAR(20),
-last_name VARCHAR(20),
-state VARCHAR(20),
-address VARCHAR(5)
-);
-
--- Creat sellers table.
-CREATE TABLE sellers (
-seller_id INT PRIMARY KEY,
-seller_name VARCHAR(25),
-origin VARCHAR(10)
-);
-
--- Create products table
-CREATE TABLE products (
-product_id INT PRIMARY KEY,
-product_name VARCHAR(50),
-price FLOAT,
-cogs FLOAT,
-category_id INT, 
-CONSTRAINT fk_products_category_id FOREIGN KEY (category_id) REFERENCES category(category_id)
-);
-
--- Creat orders table.
-CREATE TABLE orders (
-order_id INT PRIMARY KEY,
-order_date DATE,
-customer_id INT,
-seller_id INT,
-order_status VARCHAR(15),
-CONSTRAINT fk_orders_customer_id FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
-CONSTRAINT fk_orders_seller_id FOREIGN KEY (seller_id) REFERENCES sellers(seller_id)
-);
-
--- Create order_items table.
-CREATE TABLE order_items (
-order_item_id INT PRIMARY KEY,
-order_id INT,
-product_id INT,
-quantity INT,
-price_per_unit FLOAT,
-CONSTRAINT fk_order_items_order_id FOREIGN KEY (order_id) REFERENCES orders(order_id),
-CONSTRAINT fk_order_items_product_id FOREIGN KEY (product_id) REFERENCES products(product_id)
-);
-
--- Creat payments table.
-CREATE TABLE payments (
-payment_id INT PRIMARY KEY,
-order_id INT,
-payment_date DATE,
-payment_status VARCHAR(20),
-CONSTRAINT fk_payments_order_id FOREIGN KEY (order_id) REFERENCES orders(order_id)
-);
-
--- Creat shippings table.
-CREATE TABLE shippings (
-shipping_id INT PRIMARY KEY,
-order_id INT,
-shipping_date DATE,
-return_date DATE,
-shipping_providers VARCHAR(15),
-delivery_status VARCHAR(15),
-CONSTRAINT fk_shippings_order_id FOREIGN KEY (order_id) REFERENCES orders(order_id)
-);
-
--- Creat inventory table.
-CREATE TABLE inventory (
-inventory_id INT,
-product_id INT,
-stock INT,
-warehouse_id INT,
-last_stock_date DATE,
-CONSTRAINT fk_inventory_product_id FOREIGN KEY (product_id) REFERENCES products(product_id)
-);
-
--- EDA
-
-
-
 -- Business Questions
 -- Advance Analysis
 /* Q.1 Query the top 10 products by total sales value.
@@ -104,8 +15,8 @@ SET total_sales=quantity*price_per_unit;
 SELECT oi.product_id, p.product_name, sum(oi.quantity) AS total_quantity, 
 		sum(oi.total_sales) AS total_sales
 FROM orders AS o
-LEFT JOIN order_items AS oi ON o.order_id=oi.order_id
-LEFT JOIN products AS p ON p.product_id=oi.product_id 
+JOIN order_items AS oi ON o.order_id=oi.order_id
+JOIN products AS p ON p.product_id=oi.product_id 
 GROUP BY 1, 2
 ORDER BY total_sales DESC
 LIMIT 10;
@@ -200,16 +111,16 @@ Challenge: Rank customers based on their customer life time value (CLTV).
 -- Answer
 
 
-
 /* Q.9 Identity orders where the shipping date is later than 3 days after the order date.
 Challenge: Include customer, order details, and delivery provider.
 */
 -- Answer
-SELECT o.order_id, CONCAT(c.first_name, ' ', c.last_name) AS customer_name, c.state AS customer_state, o.seller_id, o.order_date, s.shipping_date, 
+SELECT o.order_id, CONCAT(c.first_name, ' ', c.last_name) AS customer_name, c.state AS customer_state, 
+			o.seller_id, o.order_date, s.shipping_date, 
 							s.shipping_providers, o.order_status
 FROM orders AS o
-LEFT JOIN shippings AS s ON o.order_id=s.order_id
-LEFT JOIN customers AS c ON c.customer_id=o.customer_id
+JOIN shippings AS s ON o.order_id=s.order_id
+JOIN customers AS c ON c.customer_id=o.customer_id
 WHERE s.shipping_date >= o.order_date + INTERVAL '3 DAYS' ;
 
 
@@ -233,8 +144,8 @@ Challenge: Include both successful and failed orders, and display their percenta
 WITH seller_sales AS (SELECT s.seller_id, s.seller_name, o.order_status,
 			count(o.order_id) AS total_orders,ROUND(sum(oi.total_sales)::NUMERIC, 2) AS total_sales
 FROM orders AS o
-LEFT JOIN sellers AS s ON o.seller_id=s.seller_id
-LEFT JOIN order_items AS oi ON oi.order_id=o.order_id
+JOIN sellers AS s ON o.seller_id=s.seller_id
+JOIN order_items AS oi ON oi.order_id=o.order_id
 WHERE o.order_status IN ('Completed', 'Cancelled')
 GROUP BY 1, 2,3
 ORDER BY 1)
@@ -244,8 +155,8 @@ FROM seller_sales;
 --or
 WITH seller_sales AS (SELECT s.seller_id, s.seller_name, o.order_status, count(o.order_id) AS total_orders
 FROM orders AS o
-LEFT JOIN sellers AS s ON o.seller_id=s.seller_id
-LEFT JOIN order_items AS oi ON oi.order_id=o.order_id
+JOIN sellers AS s ON o.seller_id=s.seller_id
+JOIN order_items AS oi ON oi.order_id=o.order_id
 WHERE o.order_status IN ('Completed', 'Cancelled')
 GROUP BY 1, 2, 3
 ORDER BY 1)
@@ -275,9 +186,142 @@ GROUP BY 1;
 /* Q.13 Query the top 10 products by the number of returns.
 Challenge: Display the return rate as a percentage of total units sold for each product.
 */
+-- Answer 
+SELECT oi.product_id, p.product_name,  count(oi.order_id) FILTER (WHERE o.order_status='Returned') 
+					AS total_times_return, count(oi.order_id) AS total_orders,
+	ROUND(100*count(oi.order_id) FILTER (WHERE o.order_status='Returned')::NUMERIC/ count(oi.order_id),2)
+	AS return_rate
+FROM order_items AS oi
+LEFT JOIN orders AS o ON o.order_id=oi.order_id
+LEFT JOIN products AS p ON p.product_id=oi.product_id
+GROUP BY 1, 2
+ORDER BY return_rate DESC;
+
+
+/* Q.14 Identify seller who haven't made any sales in the last 6 months.
+Challenge: Show the last sale date and total sales from those sellers.
+*/
 -- Answer
-SELECT DISTINCT order_status
-FROM orders;
+SELECT ss.seller_id, sum(oi.total_sales) AS total_sales, max(o.order_date) AS last_sale_date
+FROM orders AS o
+JOIN (SELECT seller_id, seller_name
+FROM sellers 
+WHERE seller_id NOT IN (
+SELECT seller_id FROM orders WHERE order_date >= CURRENT_DATE -INTERVAL '6 MONTHS'
+)) AS ss ON o.seller_id= ss.seller_id
+JOIN order_items AS oi ON oi.order_id=o.order_id
+GROUP BY 1
+ORDER BY 1;
+
+--or
+WITH ctel AS (SELECT * FROM sellers
+WHERE seller_id NOT IN (SELECT seller_id FROM orders WHERE order_date >= CURRENT_DATE -INTERVAL '6 MONTHS'))
+SELECT ctel.seller_id, max(o.order_date) AS last_date, sum(oi.total_sales) AS total_sales
+FROM orders AS o
+JOIN ctel
+ON ctel.seller_id=o.seller_id
+JOIN order_items AS oi
+ON o.order_id=oi.order_id
+GROUP BY 1
+ORDER BY 1; 
+
+
+/* Q.15 If the customer has done more than 5 return categorize them as returning otherwise new. 
+Challenge: List customer id, name, total orders and total returns.
+*/
+-- Answer 
+SELECT o.customer_id, CONCAT(c.first_name, ' ', c.last_name), 
+						count(o.order_id) AS total_orders, 
+						sum(CASE WHEN o.order_status='Returned' THEN 1 ELSE 0 END) AS total_returns,
+CASE WHEN sum(CASE WHEN o.order_status='Returned' THEN 1 ELSE 0 END) >5 THEN 'returning' ELSE 'new' END AS category
+FROM orders AS o 
+LEFT JOIN customers AS c ON o.customer_id=c.customer_id
+GROUP BY 1, 2;
+
+/* Q.16 Identify the top 5 customers with the highest number of orders for each state.
+Challenge: Include the number of orders and total sales for each customer.
+*/
+-- Answer 
+SELECT *
+FROM (SELECT o.customer_id, c.state, count(o.order_id) AS total_orders, sum(oi.total_sales) AS total_sales, 
+    DENSE_RANK() OVER(PARTITION BY c.state ORDER BY sum(oi.total_sales) DESC) AS ranking
+FROM orders AS o
+LEFT JOIN customers AS c ON c.customer_id=o.customer_id
+LEFT JOIN order_items AS oi ON oi.order_id=o.order_id
+GROUP BY 1, 2)
+WHERE ranking <=5;
+
+
+/* Q.17 Calculate the total revenue handles by each shipping provider.
+Challenge: Include the total number of orders handled and the average
+delivery time for each provider.
+*/
+-- Answer 
+SELECT s.shipping_providers, count(oi.order_id) AS total_orders, sum(oi.total_sales) AS total_sales, 
+			ROUND(avg(s.shipping_date-o.order_date),2) AS avg_delivery_days 
+FROM order_items AS oi
+JOIN shippings AS s ON oi.order_id=s.order_id
+JOIN orders AS o ON o.order_id=oi.order_id
+WHERE s.return_date IS NULL
+GROUP BY 1
+ORDER BY total_sales DESC;
+
+--or
+SELECT s.shipping_providers, count(o.order_id) AS total_orders, sum(oi.total_sales) AS total_sales,
+	ROUND(avg(s.shipping_date-o.order_date), 2) AS avg_delivery_days
+FROM orders AS o
+JOIN order_items AS oi ON oi.order_id=o.order_id
+JOIN shippings AS s ON s.order_id=o.order_id
+WHERE s.return_date IS NULL
+GROUP BY 1
+ORDER BY total_sales DESC;
+
+
+/* Q.18 Top 10 products with highest decreasing revenue ratio compare to last year (e.g 2022)
+and current year (e.g 2023).
+Challenge: Return product id, name, category name, 2022 revenue and 2023 revenue decrease ratio
+at end. Round the results
+Note: Decrease ratio= 100*(current_year_revenue-last_year_revenue)/last_year_revenue.
+*/
+-- Answer 
+WITH revenue_22_23 AS (SELECT p.product_id, p.product_name, category_name, 
+		ROUND(sum(CASE WHEN EXTRACT(YEAR FROM pay.payment_date)=2022 
+		THEN oi.total_sales ELSE 0 END)::NUMERIC, 2) AS revenue_2022,
+		ROUND(sum(CASE WHEN EXTRACT(YEAR FROM pay.payment_date)=2023 
+		THEN oi.total_sales ELSE 0 END)::NUMERIC, 2) AS revenue_2023
+FROM orders AS o
+JOIN order_items AS oi ON o.order_id=oi.order_id
+JOIN products AS p ON p.product_id=oi.product_id
+JOIN payments AS pay ON pay.order_id=oi.order_id
+JOIN category AS c ON c.category_id=p.category_id
+WHERE pay.payment_status='Payment Successed'   -- Include only orders with successful payment.
+GROUP BY 1, 2, 3
+ORDER BY 1)
+SELECT *, ROUND(100*(revenue_2023-revenue_2022)/NULLIF(revenue_2022,0),2) AS revenue_ratio
+FROM revenue_22_23
+WHERE revenue_2022 > revenue_2023 -- This only includes the products with decreasing revenue.
+ORDER BY revenue_ratio DESC
+LIMIT 10;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
