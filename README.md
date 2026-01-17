@@ -1,9 +1,4 @@
-<p align="center">
-  <img width="80" height="120"
-       alt="Netflix_2016_N_logo svg"
-       src="https://github.com/user-attachments/assets/2a621055-390a-4ed3-8d72-2a613d403d60" />
-</p>
-
+<img width="591" height="393" alt="Screenshot 2026-01-17 171916" src="https://github.com/user-attachments/assets/cdcba23f-dec6-42bc-b95c-5972bfda3bb4" />
 ## Amazon Sales Data Analysis Using SQL (PostgreSQL)
 ### 📌 Project Overview
 I analyzed a dataset with over 20,000 sales records from an Amazon-like e-commerce platform using PostgreSQL. In this project, I used SQL queries to study customer behavior, product performance, and sales trends. I worked on tasks such as revenue analysis, customer grouping, and inventory tracking. \
@@ -14,8 +9,7 @@ The main goal of this project is to demonstrate strong SQL skills by using compl
 - Sales trend evaluation
 - Inventory control and management
 - Payment and shipping insights
-
-Product performance and demand forecasting
+- Product performance and demand forecasting
 
 ### Database Schema
 ```sql
@@ -27,7 +21,8 @@ category_name VARCHAR(20)
 SELECT * FROM category;
 -- Creating customers table
 DROP TABLE IF EXISTS customers;
-CREATE TABLE customers (
+CREATE TABLE customers (<img width="591" height="393" alt="Screenshot 2026-01-17 171916" src="https://github.com/user-attachments/assets/b00e9278-76d9-4774-85e7-89a06c58c211" />
+
 customer_id INT PRIMARY KEY,
 first_name VARCHAR(20),
 last_name VARCHAR(20),
