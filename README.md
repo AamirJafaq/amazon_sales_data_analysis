@@ -1,6 +1,7 @@
 <p align="center">
-  <img src="path/to/image.png" alt="Logo" width="300" height="300">
+  <img src="amazon_logo.png" alt="Amazon Logo" width="350" height="300">
 </p>
+
 ## Amazon Sales Data Analysis Using SQL (PostgreSQL)
 ### 📌 Project Overview
 I analyzed a dataset with over 20,000 sales records from an Amazon-like e-commerce platform using PostgreSQL. In this project, I used SQL queries to study customer behavior, product performance, and sales trends. I worked on tasks such as revenue analysis, customer grouping, and inventory tracking. \
