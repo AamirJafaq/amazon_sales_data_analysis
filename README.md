@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img width="500" height="300" alt="Screenshot 2026-01-17 171916"
+  <img width="400" height="200" alt="Screenshot 2026-01-17 171916"
        src="https://github.com/user-attachments/assets/9d51a9dd-4eee-41d5-bace-c6188ea37300" />
 </p>
 
