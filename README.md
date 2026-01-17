@@ -6,7 +6,7 @@
 
 ## Amazon Sales Data Analysis Using SQL (PostgreSQL)
 ### 📌 Project Overview
-I analyzed a dataset with over 20,000 sales records from an Amazon-like e-commerce platform using PostgreSQL. In this project, I used SQL queries to study customer behavior, product performance, and sales trends. I worked on tasks such as revenue analysis, customer grouping, and inventory tracking. \
+I analyzed a dataset with over 20000 sales records from an Amazon-like e-commerce platform using PostgreSQL. In this project, I used SQL queries to study customer behavior, product performance, and sales trends. I worked on tasks such as revenue analysis, customer grouping, and inventory tracking. \
 The project also involved cleaning the data, handling missing values, and answering real-world business questions using PostgreSQL. An ERD diagram is included to show the database structure and the relationships between tables.
 ### Objective
 The main goal of this project is to demonstrate strong SQL skills by using complex queries to solve practical e-commerce business problems. The analysis focuses on key areas of e-commerce operations, including:
