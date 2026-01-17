@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="amazon_logo.png" alt="Amazon Logo" width="350" height="300">
+  <img src="image.png" alt="Logo" width="200">
 </p>
 
 ## Amazon Sales Data Analysis Using SQL (PostgreSQL)
