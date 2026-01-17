@@ -1,4 +1,6 @@
-<img width="591" height="393" alt="Screenshot 2026-01-17 171916" src="https://github.com/user-attachments/assets/cdcba23f-dec6-42bc-b95c-5972bfda3bb4" />
+<p align="center">
+  <img src="path/to/image.png" alt="Logo" width="300" height="300">
+</p>
 ## Amazon Sales Data Analysis Using SQL (PostgreSQL)
 ### 📌 Project Overview
 I analyzed a dataset with over 20,000 sales records from an Amazon-like e-commerce platform using PostgreSQL. In this project, I used SQL queries to study customer behavior, product performance, and sales trends. I worked on tasks such as revenue analysis, customer grouping, and inventory tracking. \
