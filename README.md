@@ -139,9 +139,10 @@ LEFT JOIN category AS c ON p.category_id= c.category_id
 GROUP BY 1, 2
 ORDER BY 1;
 ```
-```sql
+
 Q.3 Compute the average order value for each customer.
 Challenge: Include only customers with more than 5 orders.
+```sql
 -- Answer
 SELECT c.customer_id, count(o.order_id) AS order_value, sum(oi.total_sales)
 FROM customers AS c
@@ -151,11 +152,11 @@ GROUP BY c.customer_id
 HAVING count(o.order_id)>5
 ORDER BY c.customer_id DESC;
 ```
-```sql
+
 Q.4 Montly Sales Trend
 Query montly total sales over the past year.
 Challenge; Display the sales trend, grouping by month, return current_month sale, last month sale.
-
+```sql
 -- Answer
 WITH last_year_sales AS (SELECT count(pay.order_id) AS total_orders, 
 		EXTRACT(MONTH FROM payment_date) AS month, 
@@ -169,10 +170,10 @@ SELECT month, year, total_sales AS current_month_sales,
 		LAG(total_sales, 1) OVER (ORDER BY year DESC, month DESC) AS last_month_sales
 FROM last_year_sales;
 ```
-```sql
+
 Q.5 Find customers who have registered but never placed an order.
 Challenge: List customer details.
-
+```sql
 -- Answer
 SELECT c.customer_id, concat(c.first_name, ' ', c.last_name) AS customer_name, c.state
 FROM customers AS c
@@ -185,10 +186,10 @@ FROM customers
 WHERE customer_id NOT IN (SELECT customer_id FROM orders)
 ORDER BY customer_id DESC;
 ```
-```sql
+
 Q.6 Identify the least selling product category for each state.
 Challenge: Include the total sales for what category within each sate.
-
+```sql
 -- Answer
 SELECT category_id, category_name 
 FROM category; 
@@ -216,10 +217,10 @@ WHERE ranking=1;
 
 ```
 
-```sql
+
 Q.9 Identity orders where the shipping date is later than 3 days after the order date.
 Challenge: Include customer, order details, and delivery provider.
-
+```sql
 -- Answer
 SELECT o.order_id, CONCAT(c.first_name, ' ', c.last_name) AS customer_name, c.state AS customer_state, 
 			o.seller_id, o.order_date, s.shipping_date, 
@@ -230,10 +231,10 @@ JOIN customers AS c ON c.customer_id=o.customer_id
 WHERE s.shipping_date >= o.order_date + INTERVAL '3 DAYS' ;
 ```
 
-```sql
+
 Q.10 Calcualte the percentage of successful payments across all orders.
 Challenge: Include breakdowns by payment status (e.g. failed, pending).
-
+```sql
 -- Answer
 SELECT count(o.order_id) AS total_orders, p.payment_status, 
 		ROUND(100*count(o.order_id)::NUMERIC/(SELECT count(order_id) FROM payments), 2) AS percent
@@ -242,10 +243,10 @@ JOIN payments AS p ON p.order_id=o.order_id
 GROUP BY payment_status;
 ```
 
-```sql
+
 Q.11 Find the top 5 sellers based on total sales value.
 Challenge: Include both successful and failed orders, and display their percentage of successful orders.
-
+```sql
 -- Answer
 WITH seller_sales AS (SELECT s.seller_id, s.seller_name, o.order_status,
 			count(o.order_id) AS total_orders,ROUND(sum(oi.total_sales)::NUMERIC, 2) AS total_sales
@@ -275,10 +276,10 @@ FROM seller_sales
 GROUP BY 1, 2;
 ```
 
-```sql
+
 Q.12 Calculate the profit margin for each product (diff between price and cost of goods sold).
 Challenge: Rank products by their margin, showing highest to lowest.
-
+```sql
 -- Answer
 SELECT p.product_id, ROUND(sum(p.cogs*oi.quantity)::NUMERIC,2) AS total_cost,  
 			ROUND(sum(oi.total_sales)::NUMERIC,2) AS total_revenue,
@@ -289,10 +290,9 @@ RIGHT JOIN order_items AS oi ON p.product_id=oi.product_id
 GROUP BY 1;
 ```
 
-```sql
 Q.13 Query the top 10 products by the number of returns.
 Challenge: Display the return rate as a percentage of total units sold for each product.
-
+```sql
 -- Answer 
 SELECT oi.product_id, p.product_name,  count(oi.order_id) FILTER (WHERE o.order_status='Returned') 
 					AS total_times_return, count(oi.order_id) AS total_orders,
@@ -305,10 +305,9 @@ GROUP BY 1, 2
 ORDER BY return_rate DESC;
 ```
 
-```sql
 Q.14 Identify seller who haven't made any sales in the last 6 months.
 Challenge: Show the last sale date and total sales from those sellers.
-
+```sql
 -- Answer
 SELECT ss.seller_id, sum(oi.total_sales) AS total_sales, max(o.order_date) AS last_sale_date
 FROM orders AS o
@@ -335,10 +334,10 @@ ORDER BY 1;
 
 ```
 
-```sql
+
 Q.15 If the customer has done more than 5 return categorize them as returning otherwise new.
 Challenge: List customer id, name, total orders and total returns.
-
+```sql
 -- Answer 
 SELECT o.customer_id, CONCAT(c.first_name, ' ', c.last_name), 
 						count(o.order_id) AS total_orders, 
@@ -350,10 +349,9 @@ GROUP BY 1, 2;
 
 ```
 
-```sql
 Q.16 Identify the top 5 customers with the highest number of orders for each state.
 Challenge: Include the number of orders and total sales for each customer.
-
+```sql
 -- Answer 
 SELECT *
 FROM (SELECT o.customer_id, c.state, count(o.order_id) AS total_orders, sum(oi.total_sales) AS total_sales, 
@@ -366,10 +364,9 @@ WHERE ranking <=5;
 
 ```
 
-```sql
 Q.17 Calculate the total revenue handles by each shipping provider.
 Challenge: Include the total number of orders handled and the average delivery time for each provider.
-
+```sql
 -- Answer 
 SELECT s.shipping_providers, count(oi.order_id) AS total_orders, sum(oi.total_sales) AS total_sales, 
 			ROUND(avg(s.shipping_date-o.order_date),2) AS avg_delivery_days 
@@ -381,10 +378,10 @@ GROUP BY 1
 ORDER BY total_sales DESC;
 ```
 
-```sql
 Q.18 Top 10 product with highest decreasing revenue ratio compare to last year(2022) and current_year(2023).
 Challenge: Return product_id, product_name, category_name, 2022 revenue and 2023 revenue decrease ratio at end Round the result.
 Note: Decrease ratio= 100*(current_year_revenue-last_year_revenue)/last_year_revenue.
+```sql
 -- Answer 
 WITH revenue_22_23 AS (SELECT p.product_id, p.product_name, category_name, 
 		ROUND(sum(CASE WHEN EXTRACT(YEAR FROM pay.payment_date)=2022 
@@ -405,10 +402,11 @@ WHERE revenue_2022 > revenue_2023 -- This only includes the products with decrea
 ORDER BY revenue_ratio DESC
 LIMIT 10;
 ```
-```sql
+Q.19
 Final Task: Create a procedure that as soon as the product is sold it update the tables such as orders, order_items and inventory.
 Before reducing the quantity purchased from stock, make sure the stock level is greater or equal to quantity purchased.
 
+```sql
 CREATE OR REPLACE PROCEDURE update_tables(
 prod_id INT,
 ord_id INT,
