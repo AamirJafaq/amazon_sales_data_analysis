@@ -457,7 +457,6 @@ This project helped me to:
 - Clean and prepare real-world data for analysis.
 - Apply advanced SQL concepts such as joins, subqueries, and window functions.
 - Perform detailed business analysis using SQL queries.
-- Improve query performance and efficiently work with large datasets.s
 
 ### ▶️ Conclusion
 This advanced SQL project highlights my ability to address real-world e-commerce challenges through well-structured queries. The analysis covers areas such as customer retention, inventory optimization, and logistics improvement, offering practical insights into operational issues and possible solutions.\
